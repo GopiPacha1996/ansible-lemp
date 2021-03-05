@@ -1,0 +1,24 @@
+- name: Insatlling Nginx
+  tags: nignx
+  apt: name=nginx state=latest
+  register: nginx_installed
+- name: enabling nginx service
+  command: systemctl enable nginx
+  when: nginx_installed.changed  
+
+- name: Updating Nginx config file
+  become: true
+  copy:
+    src: templates/coffee_nginx.conf
+    dest: /etc/nginx/sites-available/lets_eduvate.conf
+    owner: root
+    group: root
+    mode: 0644
+- name: Linking with sites-enabled files
+  become: true
+  file:
+    src: "/etc/nginx/sites-available/lets_eduvate.conf"
+    dest: "/etc/nginx/sites-enabled/lets_eduvate.conf"
+    state: link
+    owner: root
+    group: root

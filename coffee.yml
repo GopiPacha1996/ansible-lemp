@@ -1,0 +1,26 @@
+---
+
+- hosts: web-server
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  pre_tasks:
+    - name: Updating cache
+      apt: 
+       update_cache: yes
+    - name: removing apache2 
+      apt: name=apache2 state=absent
+  vars_files:
+        - "./vars/coffee.yml"
+  roles:
+    - git
+    - php7.3
+    - nginx
+    - mysql
+  tasks:
+     - name: restarting php-fpm and nginx
+       command: systemctl restart {{item}}
+       with_items:
+             - nginx
+             - php7.3-fpm
+       when: gitcloned.changed
